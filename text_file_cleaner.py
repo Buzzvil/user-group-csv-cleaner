@@ -26,11 +26,12 @@ class TextFileCleaner():
 
     def process(self):
         for path in self.path_list:
-            in_file = open(path, encoding='utf-8')
-            out_filename = self.add_prefix(path, 'cleaned_')
-            with open(out_filename, 'w', encoding='utf-8') as out_file:
-                for processed_lines in self.process_file(in_file, out_file):
-                    yield processed_lines
+            with open(path, encoding='utf-8') as in_file:
+                out_filename = self.add_prefix(path, 'cleaned_')
+                with open(out_filename, 'w', encoding='utf-8') as out_file:
+                    for processed_lines in self.process_file(in_file, out_file):
+                        yield processed_lines
+
 
     def add_prefix(self, path: str, prefix: str):
         head, tail = os.path.split(path)
