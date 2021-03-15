@@ -4,12 +4,13 @@ import errno
 import os
 import signal
 import sys
+from functools import partial
 from os.path import isfile, join
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QPushButton, QVBoxLayout, QWidget, \
-    QLabel, QProgressDialog, QMessageBox, QFileDialog
+    QLabel, QProgressDialog, QMessageBox, QFileDialog, QCheckBox
 from qasync import QEventLoop, asyncSlot
 
 # 이 패치를 하면 print output이 buffering되는 문제가 있어 pyinstaller runtime에서만 적용
@@ -123,6 +124,9 @@ class AppDemo(QMainWindow):
         self.clear_btn.clicked.connect(self.clear_list_widget)
         layout.addWidget(self.clear_btn)
 
+        self.merge_cb = QCheckBox('Merge', self)
+        layout.addWidget(self.merge_cb)
+
         self.label = QLabel(self)
         self.label.setText("Please drag & drop here")
         layout.addWidget(self.label)
@@ -163,6 +167,15 @@ class AppDemo(QMainWindow):
             )
             return
 
+        if self.merge_cb.isChecked():
+            merged_path = QFileDialog.getSaveFileName(None, 'Save File', '/Users/jeseo/Downloads/merged.csv')[0]
+            if not merged_path:
+                print("Save file not selected")
+                return
+            process_func = partial(cleaner.process_merge, merged_path)
+        else:
+            process_func = cleaner.process
+
         self.progress = QProgressDialog('Work in progress', 'Cancel', 0, cleaner.get_total_file_lines(), self)
         self.progress.setWindowTitle("Generating files...")
         self.progress.setWindowModality(Qt.WindowModal)
@@ -171,7 +184,8 @@ class AppDemo(QMainWindow):
 
         print(f"Process {path_list} total_file_lines {cleaner.get_total_file_lines()}")
         total_processed_lines = 0
-        for processed_lines in cleaner.process():
+
+        for processed_lines in process_func():
             total_processed_lines += processed_lines
             print(f'processed_lines {total_processed_lines}')
             self.progress.setValue(total_processed_lines)

@@ -32,6 +32,13 @@ class TextFileCleaner():
                     for processed_lines in self.process_file(in_file, out_file):
                         yield processed_lines
 
+    def process_merge(self, out_path):
+        with open(out_path, 'w', encoding='utf-8') as out_file:
+            for in_path in self.path_list:
+                with open(in_path, encoding='utf-8') as in_file:
+                    for processed_lines in self.process_file(in_file, out_file):
+                        yield processed_lines
+
 
     def add_prefix(self, path: str, prefix: str):
         head, tail = os.path.split(path)
