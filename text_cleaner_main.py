@@ -1,30 +1,52 @@
 # -*- coding:utf-8 -*-
 import asyncio
-import codecs
+import errno
 import os
 import signal
 import sys
 from os.path import isfile, join
+from pathlib import Path
 
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QPushButton, QVBoxLayout, QWidget, \
-    QLabel, QProgressDialog, QMessageBox
+    QLabel, QProgressDialog, QMessageBox, QFileDialog
 from qasync import QEventLoop, asyncSlot
 
 # 이 패치를 하면 print output이 buffering되는 문제가 있어 pyinstaller runtime에서만 적용
 from text_file_cleaner import TextFileCleaner
 from text_filters import StripWhiteSpaceFilter, StripQuotesFilter, UUIDDashFilter, ValidUUIDFilter
 
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    # https://stackoverflow.com/questions/59897292/pyinstaller-windowed-problems
-    if sys.stdout.encoding != 'UTF-8':
-        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    if sys.stderr.encoding != 'UTF-8':
-        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
-
-
 APP_VERSION = '0.0.2'
 DEBUG = False
+
+
+# https://stackoverflow.com/questions/107705/disable-output-buffering
+class Unbuffered(object):
+    def __init__(self, stream):
+        self.stream = stream
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+    def writelines(self, datas):
+        self.stream.writelines(datas)
+        self.stream.flush()
+    def __getattr__(self, attr):
+        return getattr(self.stream, attr)
+
+
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    log_path = str(Path.home()) + '/Library/Logs/Text cleaner/log.txt'
+    if not os.path.exists(os.path.dirname(log_path)):
+        try:
+            os.makedirs(os.path.dirname(log_path))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    # encoding설정 안하면 pyinstaller로 만든 실행파일에서 unicode print시 encoding에러 발생
+    output = Unbuffered(open(log_path, 'w+', encoding='utf-8'))
+    sys.stdout = output
+    sys.stderr = output
 
 
 class ListBoxWidget(QListWidget):
@@ -97,7 +119,7 @@ class AppDemo(QMainWindow):
         self.process_btn.clicked.connect(self.process_list_widget)
         layout.addWidget(self.process_btn)
 
-        self.clear_btn = QPushButton('Clear', self)
+        self.clear_btn = QPushButton('Clear list', self)
         self.clear_btn.clicked.connect(self.clear_list_widget)
         layout.addWidget(self.clear_btn)
 
@@ -189,6 +211,8 @@ if __name__ == '__main__':
 
     demo = AppDemo()
     demo.show()
+
+    print("Running...")
 
     # https://github.com/CabbageDevelopment/qasync/blob/master/examples/aiohttp_fetch.py
     with loop:

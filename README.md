@@ -1,6 +1,6 @@
 User group text cleaner
 
-## Build env
+## Setup env
 ```shell script
 # Tested with Python 3.9.2
 $ brew install pyqt5
@@ -11,7 +11,7 @@ $ pip install -r requirements.txt
 
 ## Run
 ```shell script
-$ python text_clean.py
+$ python text_cleaner_main.py
 ```
 ---
 
@@ -42,5 +42,9 @@ sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer/
 ## Trouble shootings
 --windowed로 pyinstaller 만들면 UnicodeDecodeError가 발생하는 경우가 있는데 open함수에 encoding='utf-8' 옵션을 주어서 해결.
 https://stackoverflow.com/questions/47692960/error-when-using-pyinstaller-unicodedecodeerror-utf-8-codec-cant-decode-byt
+
+PyQt5 5.13.2, 5.14.2, 5.15.4 버전은 pyinstaller로 패키징시 문제가 있어 5.13대 버전 활용.
+5.13.2, 5.14.2 -> Application not responsd. CPU 100%먹음.
+5.15.4 -> 실행 자체가 안됨.
 
 © 2021 [Buzzvil](http://www.buzzvil.com), shared under the [MIT license](http://www.opensource.org/licenses/MIT).

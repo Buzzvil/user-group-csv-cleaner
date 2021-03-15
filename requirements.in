@@ -1,4 +1,4 @@
-PyQt5==5.14.2
+PyQt5==5.13.0
 pip-tools==5.5.0
 pyinstaller==4.2
 qasync==0.13.0
