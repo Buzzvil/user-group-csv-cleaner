@@ -15,9 +15,10 @@ from qasync import QEventLoop, asyncSlot
 
 # 이 패치를 하면 print output이 buffering되는 문제가 있어 pyinstaller runtime에서만 적용
 from text_file_cleaner import TextFileCleaner
-from text_filters import StripWhiteSpaceFilter, StripQuotesFilter, UUIDDashFilter, ValidUUIDFilter
+from text_filters import StripWhiteSpaceFilter, StripQuotesFilter, UUIDDashFilter, ValidUUIDFilter, \
+    UUIDSuffixRemoveFilter, UUIDPrefixRemoveFilter
 
-APP_VERSION = '0.0.3'
+APP_VERSION = '0.0.4'
 DEBUG = False
 
 
@@ -155,6 +156,8 @@ class AppDemo(QMainWindow):
                 StripWhiteSpaceFilter(),
                 StripQuotesFilter(),
                 UUIDDashFilter(),
+                UUIDSuffixRemoveFilter(),
+                UUIDPrefixRemoveFilter(),
                 ValidUUIDFilter(),
             ]
         )
