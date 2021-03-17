@@ -3,11 +3,12 @@ import re
 from abc import abstractmethod, ABC
 
 
-uuid_patter = re.compile('^[a-fA-F\d]{8}\-[a-fA-F\d]{4}\-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}$')
+uuid_pattern = re.compile('^[a-fA-F\d]{8}\-[a-fA-F\d]{4}\-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}$')
+uuid_char_pattern = re.compile('[^a-fA-F\d\-]')
 
 
 def _is_valid_uuid(line):
-    if re.match(uuid_patter, line):
+    if re.match(uuid_pattern, line):
         return line
     else:
         return None
@@ -19,9 +20,11 @@ class FilterBase(ABC):
         pass
 
 
-class StripQuotesFilter(FilterBase):
+class RemoveNoneUUIDCharFilter(FilterBase):
     def filter(self, line):
-        return line.strip('"\'')
+        a = re.sub(uuid_char_pattern, '',  line)
+        print(f"from {line} to {a}")
+        return re.sub(uuid_char_pattern, '',  line)
 
 
 class StripWhiteSpaceFilter(FilterBase):

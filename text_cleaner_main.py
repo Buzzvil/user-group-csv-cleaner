@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QPushButton,
 from qasync import QEventLoop, asyncSlot
 
 from text_file_cleaner import TextFileCleaner
-from text_filters import StripWhiteSpaceFilter, StripQuotesFilter, UUIDDashFilter, ValidUUIDFilter, \
+from text_filters import StripWhiteSpaceFilter, RemoveNoneUUIDCharFilter, UUIDDashFilter, ValidUUIDFilter, \
     UUIDSuffixRemoveFilter, UUIDPrefixRemoveFilter
 
 APP_VERSION = '0.1.0'
@@ -157,8 +157,7 @@ class AppDemo(QMainWindow):
             """1. csv, xls, xlsx 파일을 지원합니다.
 2. csv는 한 줄을 하나의 id로 처리하며 xls, xlsx는 컬럼이 여러개인 경우 각 컬럼을 별개의 id로 처리합니다.
 3. 각 id를 처리하는 순서는 다음과 같습니다.
-- 양쪽의 공백을 제거합니다.
-- 양쪽의 " 와 '를 제거합니다.
+- 특수문자 및 공백 등 포맷에 맞지 않는 문자를 모두 제거합니다.
 - 대시가 빠진 32자 문자인 경우 대시를 추가합니다.
 E.g. 7f2d5f5f2b324b58803ecd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
 - 앞 36자가 정상적인 포맷인 경우 남은 뒤의 문자를 제거합니다.
@@ -175,7 +174,7 @@ E.g. xxx7f2d5f5f-2b32-4b58-803e-cd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4
             path_list=path_list,
             filters=[
                 StripWhiteSpaceFilter(),
-                StripQuotesFilter(),
+                RemoveNoneUUIDCharFilter(),
                 UUIDDashFilter(),
                 UUIDSuffixRemoveFilter(),
                 UUIDPrefixRemoveFilter(),
