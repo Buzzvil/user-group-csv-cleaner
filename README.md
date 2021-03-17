@@ -18,7 +18,9 @@ $ python text_cleaner_main.py
 ## Build executable app
 ```shell script
 # Build package
-pyinstaller --windowed --noconfirm --icon=icon.icns --name="Text cleaner" text_cleaner_main.py
+pyinstaller --hidden-import=cmath --windowed --noconfirm --icon=icon.icns --name="Text cleaner" text_cleaner_main.py
+# Regarding --hidden-import=cmath,
+# https://github.com/pyinstaller/pyinstaller/issues/5589
 
 # Build dmg
 brew install npm

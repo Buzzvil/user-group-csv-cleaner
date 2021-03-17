@@ -1,8 +1,28 @@
 # -*- coding:utf-8 -*-
+import contextlib
 import os
 
-# 이 패치를 하면 print output이 buffering되는 문제가 있어 pyinstaller runtime에서만 적용
+import pandas as pd
+
 from text_filters import FilterBase
+
+
+def excel_generator(path):
+    df = pd.read_excel(path)
+    for _, row  in df.iterrows():
+        for _, value in row.iteritems():
+            yield str(value)
+
+
+@contextlib.contextmanager
+def csv_excel_reader(path):
+    if path.endswith('xls') or path.endswith('xlsx'):
+        file = excel_generator(path)
+        yield file
+    else:
+        file = open(path, encoding='utf-8')
+        yield file
+        file.close()
 
 
 class TextFileCleaner():
@@ -12,10 +32,14 @@ class TextFileCleaner():
         self._num_excluded = 0
         self._total_lines = 0
 
+    def get_single_file_lines(self, path):
+        with csv_excel_reader(path) as file:
+            return sum(1 for _ in file)
+
     def get_total_file_lines(self):
         if not self._total_lines:
             self._total_lines = sum(map(
-                lambda path: sum(1 for _ in open(path, encoding='utf-8')),
+                lambda path: self.get_single_file_lines(path),
                 self.path_list
             ))
 
@@ -26,8 +50,8 @@ class TextFileCleaner():
 
     def process(self):
         for path in self.path_list:
-            with open(path, encoding='utf-8') as in_file:
-                out_filename = self.add_prefix(path, 'cleaned_')
+            with csv_excel_reader(path) as in_file:
+                out_filename = self.add_prefix(path, 'cleaned_').replace('.xlsx', '.csv').replace('.xls', '.csv')
                 with open(out_filename, 'w', encoding='utf-8') as out_file:
                     for processed_lines in self.process_file(in_file, out_file):
                         yield processed_lines

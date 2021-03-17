@@ -13,7 +13,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QPushButton,
     QLabel, QProgressDialog, QMessageBox, QFileDialog, QCheckBox
 from qasync import QEventLoop, asyncSlot
 
-# 이 패치를 하면 print output이 buffering되는 문제가 있어 pyinstaller runtime에서만 적용
 from text_file_cleaner import TextFileCleaner
 from text_filters import StripWhiteSpaceFilter, StripQuotesFilter, UUIDDashFilter, ValidUUIDFilter, \
     UUIDSuffixRemoveFilter, UUIDPrefixRemoveFilter

@@ -2,3 +2,6 @@ PyQt5==5.13.0
 pip-tools==5.5.0
 pyinstaller==4.2
 qasync==0.13.0
+pandas==1.2.3
+xlrd==2.0.1
+openpyxl==3.0.7
