@@ -170,7 +170,11 @@ class AppDemo(QMainWindow):
             return
 
         if self.merge_cb.isChecked():
-            merged_path = QFileDialog.getSaveFileName(None, 'Save File', '/Users/jeseo/Downloads/merged.csv')[0]
+            merged_path = QFileDialog.getSaveFileName(
+                None,
+                'Save File',
+                os.path.join(os.path.expanduser('~'), 'downloads/user_group.csv')
+            )[0]
             if not merged_path:
                 print("Save file not selected")
                 return
