@@ -17,7 +17,7 @@ from text_file_cleaner import TextFileCleaner
 from text_filters import StripWhiteSpaceFilter, StripQuotesFilter, UUIDDashFilter, ValidUUIDFilter, \
     UUIDSuffixRemoveFilter, UUIDPrefixRemoveFilter
 
-APP_VERSION = '0.0.4'
+APP_VERSION = '0.1.0'
 DEBUG = False
 
 
@@ -113,7 +113,7 @@ class AppDemo(QMainWindow):
         super().__init__()
         self.resize(600, 400)
 
-        self.setWindowTitle(f"User group text cleaner v{APP_VERSION}")
+        self.setWindowTitle(f"User Group CSV Cleaner v{APP_VERSION}")
         layout = QVBoxLayout()
 
         self.process_btn = QPushButton('Process', self)
