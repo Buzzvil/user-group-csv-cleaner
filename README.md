@@ -32,7 +32,7 @@ sudo npm install -g create-dmg
 # https://github.com/npm/npm/issues/17268#issuecomment-310167614 for more details
 sudo npm install -g create-dmg --unsafe-perm=true --allow-root
 
-create-dmg 'dist/Text cleaner.app' dist
+create-dmg 'dist/User Group CSV Cleaner.app' dist
 
 # If you gt an XCode error like "gyp: No Xcode or CLT version detected!"
 # try running the command below then retry the above command.
