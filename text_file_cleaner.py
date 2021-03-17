@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 import contextlib
 import os
+import zipfile
+from io import BytesIO, TextIOWrapper
+from zipfile import ZipFile
 
 import pandas as pd
 
@@ -63,6 +66,21 @@ class TextFileCleaner():
                     for processed_lines in self.process_file(in_file, out_file):
                         yield processed_lines
 
+    # 압축된 파일 끝에 데이터 몇줄 잘리는 문제 해결 필요
+    def process_merge_compress(self, out_path):
+        archive = BytesIO()
+        with ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as zip_archive:
+            with zip_archive.open('original.txt', 'w') as zip_dest_file:
+                text_zip_dest_file = TextIOWrapper(zip_dest_file, encoding='utf-8', newline='')
+                for in_path in self.path_list:
+                    with open(in_path, encoding='utf-8') as in_file:
+                        for processed_lines in self.process_file(in_file=in_file, out_file=text_zip_dest_file):
+                            yield processed_lines
+
+        with open(out_path, 'wb') as f:
+            f.write(archive.getbuffer())
+
+        archive.close()
 
     def add_prefix(self, path: str, prefix: str):
         head, tail = os.path.split(path)
