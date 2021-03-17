@@ -21,7 +21,7 @@ class FilterBase(ABC):
 
 class StripQuotesFilter(FilterBase):
     def filter(self, line):
-        return line.strip('"')
+        return line.strip('"\'')
 
 
 class StripWhiteSpaceFilter(FilterBase):
