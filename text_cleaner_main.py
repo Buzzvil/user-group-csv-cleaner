@@ -124,7 +124,11 @@ class AppDemo(QMainWindow):
         self.clear_btn.clicked.connect(self.clear_list_widget)
         layout.addWidget(self.clear_btn)
 
-        self.merge_cb = QCheckBox('Merge', self)
+        self.help_btn = QPushButton('Help', self)
+        self.help_btn.clicked.connect(self.show_help)
+        layout.addWidget(self.help_btn)
+
+        self.merge_cb = QCheckBox('Make a singe file', self)
         layout.addWidget(self.merge_cb)
 
         self.label = QLabel(self)
@@ -145,6 +149,24 @@ class AppDemo(QMainWindow):
 
     def clear_list_widget(self):
         self.listbox_view.clear()
+
+    def show_help(self):
+        QMessageBox.about(
+            self,
+            "Help",
+            """1. csv, xls, xlsx 파일을 지원합니다.
+2. csv는 한 줄을 하나의 id로 처리하며 xls, xlsx는 컬럼이 여러개인 경우 각 컬럼을 별개의 id로 처리합니다.
+3. 각 id를 처리하는 순서는 다음과 같습니다.
+- 양쪽의 공백을 제거합니다.
+- 양쪽의 " 와 '를 제거합니다.
+- 대시가 빠진 32자 문자인 경우 대시를 추가합니다.
+E.g. 7f2d5f5f2b324b58803ecd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
+- 앞 36자가 정상적인 포맷인 경우 남은 뒤의 문자를 제거합니다.
+E.g. 7f2d5f5f-2b32-4b58-803e-cd72faf4d07axxx -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
+- 뒤 36자가 정상적인 포맷인 경우 앞에 붙은 문자를 제거합니다.
+E.g. xxx7f2d5f5f-2b32-4b58-803e-cd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
+- 최종 결과가 정상적인 포맷인지 확인하고 아니라면 제외합니다."""
+        )
 
     @asyncSlot()
     async def process_list_widget(self):
