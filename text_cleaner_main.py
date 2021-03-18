@@ -14,10 +14,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QPushButton,
 from qasync import QEventLoop, asyncSlot
 
 from text_file_cleaner import TextFileCleaner
-from text_filters import StripWhiteSpaceFilter, RemoveNoneUUIDCharFilter, UUIDDashFilter, ValidUUIDFilter, \
-    UUIDSuffixRemoveFilter, UUIDPrefixRemoveFilter
+from text_filters import UUIDDashFilter, UUIDSearchFilter
 
-APP_VERSION = '0.1.0'
+APP_VERSION = '0.1.1'
 DEBUG = False
 
 
@@ -157,14 +156,11 @@ class AppDemo(QMainWindow):
             """1. csv, xls, xlsx 파일을 지원합니다.
 2. csv는 한 줄을 하나의 id로 처리하며 xls, xlsx는 컬럼이 여러개인 경우 각 컬럼을 별개의 id로 처리합니다.
 3. 각 id를 처리하는 순서는 다음과 같습니다.
-- 특수문자 및 공백 등 포맷에 맞지 않는 문자를 모두 제거합니다.
-- 대시가 빠진 32자 문자인 경우 대시를 추가합니다.
-E.g. 7f2d5f5f2b324b58803ecd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
-- 앞 36자가 정상적인 포맷인 경우 남은 뒤의 문자를 제거합니다.
-E.g. 7f2d5f5f-2b32-4b58-803e-cd72faf4d07axxx -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
-- 뒤 36자가 정상적인 포맷인 경우 앞에 붙은 문자를 제거합니다.
-E.g. xxx7f2d5f5f-2b32-4b58-803e-cd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4d07a
-- 최종 결과가 정상적인 포맷인지 확인하고 아니라면 제외합니다."""
+- 처음으로 발견된 정상 UUID(IFA) 문자열을 찾아 추출합니다. (prefix, suffix 동시 제거 효과)
+- 추출이 실패한 경우 처음으로 발견된 연속된 32자의 영문자열을 찾아 대시를 삽입하여 UUID로 만듭니다.
+e.g.) "00003469153d4b9a996ec04e8c84e52ea"
+-> 00003469-153d-4b9a-996e-c04e8c84e52e
+"""
         )
 
     @asyncSlot()
@@ -173,12 +169,8 @@ E.g. xxx7f2d5f5f-2b32-4b58-803e-cd72faf4d07a -> 7f2d5f5f-2b32-4b58-803e-cd72faf4
         cleaner = TextFileCleaner(
             path_list=path_list,
             filters=[
-                StripWhiteSpaceFilter(),
-                RemoveNoneUUIDCharFilter(),
+                UUIDSearchFilter(),
                 UUIDDashFilter(),
-                UUIDSuffixRemoveFilter(),
-                UUIDPrefixRemoveFilter(),
-                ValidUUIDFilter(),
             ]
         )
 

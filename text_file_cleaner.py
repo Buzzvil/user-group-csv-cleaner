@@ -91,13 +91,14 @@ class TextFileCleaner():
         for line in in_file:
             processed_lines += 1
 
+            filtered_line = None
             for filter in self.filters:
-                line = filter.filter(line)
-                if not line:
+                filtered_line = filter.filter(line)
+                if filtered_line:
                     break
 
-            if line:
-                out_file.write(line + '\n')
+            if filtered_line:
+                out_file.write(filtered_line + '\n')
             else:
                 self._num_excluded += 1
 
