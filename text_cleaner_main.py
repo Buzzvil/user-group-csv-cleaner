@@ -16,7 +16,7 @@ from qasync import QEventLoop, asyncSlot
 from text_file_cleaner import TextFileCleaner
 from text_filters import UUIDDashFilter, UUIDSearchFilter
 
-APP_VERSION = '0.1.1'
+APP_VERSION = '0.1.2'
 DEBUG = False
 
 

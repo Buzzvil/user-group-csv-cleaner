@@ -11,8 +11,8 @@ from text_filters import FilterBase
 
 
 def excel_generator(path):
-    df = pd.read_excel(path)
-    for _, row  in df.iterrows():
+    df = pd.read_excel(path, header=None)
+    for _, row in df.iterrows():
         for _, value in row.iteritems():
             yield str(value)
 
