@@ -68,6 +68,18 @@ class ListBoxWidget(QListWidget):
         else:
             event.ignore()
 
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+
+            links = self.urls_to_files(event.mimeData().urls())
+            links = self.filter_duplicates(links, self.get_all_path())
+
+            self.addItems(links)
+        else:
+            event.ignore()
+
     def get_all_path(self):
         path_list = []
         for index in range(self.count()):
@@ -93,18 +105,6 @@ class ListBoxWidget(QListWidget):
 
     def filter_duplicates(self, links: list[str], existing_links: list[str]):
         return [l for l in links if l not in existing_links]
-
-    def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.setDropAction(Qt.CopyAction)
-            event.accept()
-
-            links = self.urls_to_files(event.mimeData().urls())
-            links = self.filter_duplicates(links, self.get_all_path())
-
-            self.addItems(links)
-        else:
-            event.ignore()
 
 
 class AppDemo(QMainWindow):
