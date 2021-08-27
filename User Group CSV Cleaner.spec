@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['text_cleaner_main.py'],
-             pathex=['/Users/jeseo/Works/text_cleaner'],
+a = Analysis(['main.py'],
+             pathex=['/Users/jeseo/Works/user-group-csv-cleaner'],
              binaries=[],
              datas=[],
              hiddenimports=['cmath'],

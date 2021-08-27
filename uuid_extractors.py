@@ -3,16 +3,16 @@ import re
 from abc import abstractmethod, ABC
 
 
-class FilterBase(ABC):
+class UUIDExtractorBase(ABC):
     @abstractmethod
-    def filter(self, line):
+    def extract(self, line):
         pass
 
 
-class UUIDDashFilter(FilterBase):
+class UUIDDashExtractor(UUIDExtractorBase):
     pattern = re.compile(r'[0-9a-fA-F]{32}')
 
-    def filter(self, line):
+    def extract(self, line):
         match = re.search(self.pattern, line)
         if match:
             matched_line = match.group()
@@ -21,10 +21,10 @@ class UUIDDashFilter(FilterBase):
             return None
 
 
-class UUIDSearchFilter(FilterBase):
+class UUIDSearchExtractor(UUIDExtractorBase):
     uuid_pattern = re.compile(r'[a-fA-F\d]{8}\-[a-fA-F\d]{4}\-[a-fA-F\d]{4}-[a-fA-F\d]{4}-[a-fA-F\d]{12}')
 
-    def filter(self, line):
+    def extract(self, line):
         match = re.search(self.uuid_pattern, line)
         if match:
             return match.group()

@@ -1,4 +1,4 @@
-env
+venv
 dist
 build
 __pycache__

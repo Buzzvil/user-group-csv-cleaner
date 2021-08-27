@@ -1,16 +1,14 @@
 # -*- coding:utf-8 -*-
 import contextlib
 import os
-import zipfile
-from io import BytesIO, TextIOWrapper
-from zipfile import ZipFile
+from typing import List
 
 import pandas as pd
 
-from text_filters import FilterBase
+from uuid_extractors import UUIDExtractorBase
 
 
-def excel_generator(path):
+def parse_excel(path):
     df = pd.read_excel(path, header=None)
     for _, row in df.iterrows():
         for _, value in row.iteritems():
@@ -20,7 +18,7 @@ def excel_generator(path):
 @contextlib.contextmanager
 def csv_excel_reader(path):
     if path.endswith('xls') or path.endswith('xlsx'):
-        file = excel_generator(path)
+        file = parse_excel(path)
         yield file
     else:
         file = open(path, encoding='utf-8')
@@ -28,10 +26,10 @@ def csv_excel_reader(path):
         file.close()
 
 
-class TextFileCleaner():
-    def __init__(self, path_list: list[str], filters: list[FilterBase]):
+class CSVCleaner():
+    def __init__(self, path_list: List[str], extractors: List[UUIDExtractorBase]):
         self.path_list = path_list
-        self.filters = filters
+        self.extractors = extractors
         self._num_excluded = 0
         self._total_lines = 0
 
@@ -83,22 +81,6 @@ class TextFileCleaner():
                     for processed_lines in self.process_file(in_file, out_file):
                         yield processed_lines
 
-    # 압축된 파일 끝에 데이터 몇줄 잘리는 문제 해결 필요
-    def process_merge_compress(self, out_path):
-        archive = BytesIO()
-        with ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as zip_archive:
-            with zip_archive.open('original.txt', 'w') as zip_dest_file:
-                text_zip_dest_file = TextIOWrapper(zip_dest_file, encoding='utf-8', newline='')
-                for in_path in self.path_list:
-                    with open(in_path, encoding='utf-8') as in_file:
-                        for processed_lines in self.process_file(in_file=in_file, out_file=text_zip_dest_file):
-                            yield processed_lines
-
-        with open(out_path, 'wb') as f:
-            f.write(archive.getbuffer())
-
-        archive.close()
-
     def add_prefix(self, path: str, prefix: str):
         head, tail = os.path.split(path)
         return f"{head}/{prefix}{tail}"
@@ -108,14 +90,14 @@ class TextFileCleaner():
         for line in in_file:
             processed_lines += 1
 
-            filtered_line = None
-            for filter in self.filters:
-                filtered_line = filter.filter(line)
-                if filtered_line:
+            extracted_line = None
+            for extractor in self.extractors:
+                extracted_line = extractor.extract(line)
+                if extracted_line:
                     break
 
-            if filtered_line:
-                out_file.write(filtered_line + '\n')
+            if extracted_line:
+                out_file.write(extracted_line + '\n')
             else:
                 self._num_excluded += 1
 

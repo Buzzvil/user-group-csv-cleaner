@@ -7,17 +7,17 @@ import sys
 from functools import partial
 from os.path import isfile, join
 from pathlib import Path
+from typing import List
 
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QPushButton, QVBoxLayout, QWidget, \
     QLabel, QProgressDialog, QMessageBox, QFileDialog, QCheckBox
 from qasync import QEventLoop, asyncSlot
 
-from text_file_cleaner import TextFileCleaner
-from text_filters import UUIDDashFilter, UUIDSearchFilter
+from csv_cleaner import CSVCleaner
+from uuid_extractors import UUIDDashExtractor, UUIDSearchExtractor
 
-APP_VERSION = '0.1.3'
-DEBUG = False
+APP_VERSION = '0.1.4'
 
 
 # https://stackoverflow.com/questions/107705/disable-output-buffering
@@ -34,8 +34,10 @@ class Unbuffered(object):
         return getattr(self.stream, attr)
 
 
+# https://pyinstaller.readthedocs.io/en/stable/runtime-information.html#run-time-information
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    log_path = str(Path.home()) + '/Library/Logs/Text cleaner/log.txt'
+    print('running in a PyInstaller bundle')
+    log_path = str(Path.home()) + '/Library/Logs/User Group CSV Cleaner/log.txt'
     if not os.path.exists(os.path.dirname(log_path)):
         try:
             os.makedirs(os.path.dirname(log_path))
@@ -47,6 +49,8 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     output = Unbuffered(open(log_path, 'w+', encoding='utf-8'))
     sys.stdout = output
     sys.stderr = output
+else:
+    print('running in a normal Python process')
 
 
 class ListBoxWidget(QListWidget):
@@ -74,6 +78,7 @@ class ListBoxWidget(QListWidget):
             event.accept()
 
             links = self.urls_to_files(event.mimeData().urls())
+            # 똑같은 파일 또 집어넣으면 중복 제거
             links = self.filter_duplicates(links, self.get_all_path())
 
             self.addItems(links)
@@ -86,7 +91,7 @@ class ListBoxWidget(QListWidget):
             path_list.append(self.item(index).text())
         return path_list
 
-    def urls_to_files(self, urls) -> list[str]:
+    def urls_to_files(self, urls) -> List[str]:
         links = []
         for url in urls:
             # https://doc.qt.io/qt-5/qurl.html
@@ -95,6 +100,7 @@ class ListBoxWidget(QListWidget):
                 if os.path.isdir(local_path):
                     for file_name in os.listdir(local_path):
                         full_path = join(local_path, file_name)
+                        # Sub directory 및 숨김파일 제외
                         if isfile(full_path) and not file_name.startswith('.'):
                             links.append(full_path)
                 else:
@@ -103,11 +109,11 @@ class ListBoxWidget(QListWidget):
                 links.append(str(url.toString()))
         return links
 
-    def filter_duplicates(self, links: list[str], existing_links: list[str]):
+    def filter_duplicates(self, links: List[str], existing_links: List[str]):
         return [l for l in links if l not in existing_links]
 
 
-class AppDemo(QMainWindow):
+class CSVCleanerApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.resize(600, 400)
@@ -115,12 +121,15 @@ class AppDemo(QMainWindow):
         self.setWindowTitle(f"User Group CSV Cleaner v{APP_VERSION}")
         layout = QVBoxLayout()
 
+        # self.clear_btn.clicked signal에 연결하기 위해 미리 생성
+        self.listbox_view = ListBoxWidget(self)
+
         self.process_btn = QPushButton('Process', self)
         self.process_btn.clicked.connect(self.process_list_widget)
         layout.addWidget(self.process_btn)
 
         self.clear_btn = QPushButton('Clear list', self)
-        self.clear_btn.clicked.connect(self.clear_list_widget)
+        self.clear_btn.clicked.connect(self.listbox_view.clear)
         layout.addWidget(self.clear_btn)
 
         self.help_btn = QPushButton('Help', self)
@@ -134,20 +143,11 @@ class AppDemo(QMainWindow):
         self.label.setText("Please drag & drop here")
         layout.addWidget(self.label)
 
-        self.listbox_view = ListBoxWidget(self)
         layout.addWidget(self.listbox_view)
-
-        if DEBUG:
-            self.debugLabel = QLabel(self)
-            self.debugLabel.setText('Debug console')
-            layout.addWidget(self.debugLabel)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-
-    def clear_list_widget(self):
-        self.listbox_view.clear()
 
     def show_help(self):
         QMessageBox.about(
@@ -166,11 +166,11 @@ e.g.) "00003469153d4b9a996ec04e8c84e52ea"
     @asyncSlot()
     async def process_list_widget(self):
         path_list = self.listbox_view.get_all_path()
-        cleaner = TextFileCleaner(
+        cleaner = CSVCleaner(
             path_list=path_list,
-            filters=[
-                UUIDSearchFilter(),
-                UUIDDashFilter(),
+            extractors=[
+                UUIDSearchExtractor(),
+                UUIDDashExtractor(),
             ]
         )
 
@@ -242,8 +242,8 @@ if __name__ == '__main__':
     timer.start(100)  # You may change this if you wish.
     timer.timeout.connect(lambda: None)  # Let the interpreter run each 500 ms.
 
-    demo = AppDemo()
-    demo.show()
+    text_cleaner_app = CSVCleanerApp()
+    text_cleaner_app.show()
 
     print("Running...")
 
