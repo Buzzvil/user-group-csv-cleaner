@@ -23,7 +23,7 @@ $ pip install -r requirements.txt
 ## Setup env (Windows)
 https://www.python.org/downloads/release/python-3911/ 에서 파이썬 설치
 ```shell script
-$ pip install -r requirements.txt
+$ pip install -r requirements-windows.txt
 ```
 
 ## Run
