@@ -20,13 +20,19 @@ $ pip install -U pip
 $ pip install -r requirements.txt
 ```
 
+## Setup env (Windows)
+https://www.python.org/downloads/release/python-3911/ 에서 파이썬 설치
+```shell script
+$ pip install -r requirements.txt
+```
+
 ## Run
 ```shell script
 $ python main.py
 ```
 ---
 
-## Build executable app
+## Build executable app (Mac)
 ```shell script
 # Build package
 pyinstaller --hidden-import=cmath --windowed --noconfirm --icon=icon.icns --name="User Group CSV Cleaner" main.py
@@ -50,6 +56,12 @@ create-dmg 'dist/User Group CSV Cleaner.app' dist
 # See https://stackoverflow.com/questions/27665426/trying-to-install-bcrypt-into-node-project-node-set-up-issues
 # for more information
 sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer/
+```
+
+## Build executable app (Windows)
+바이러스로 인식되는 문제가 있어 --windowed 옵션이 빠져있다.
+```shell script
+pyinstaller --hidden-import=cmath --noconfirm --icon=icon.icns --name="User Group CSV Cleaner" main.py
 ```
 
 ## Trouble shootings
